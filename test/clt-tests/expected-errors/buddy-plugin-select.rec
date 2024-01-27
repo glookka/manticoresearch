@@ -43,10 +43,6 @@ SELECT * FROM test WHERE CONTAINS(text_field, 'NEAR((word1, word2), 3)');
 ––– output –––
 ERROR 1064 (42000): P01: syntax error, unexpected '(' near '(text_field, 'NEAR((word1, word2), 3)')'
 ––– input –––
-SELECT QUARTER(id) FROM test;
-––– output –––
-ERROR 1064 (42000): index test: parse error: P09: syntax error, unexpected '(', expecting $end near 'id)'
-––– input –––
 SELECT DISTINCT TABLE_SCHEMA from information_schema.TABLES;
 ––– output –––
 ERROR 1064 (42000): P01: syntax error, unexpected DISTINCT near 'DISTINCT TABLE_SCHEMA from information_schema.TABLES'
