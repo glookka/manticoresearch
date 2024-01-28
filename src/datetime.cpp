@@ -12,11 +12,13 @@
 
 #include "cctz/time_zone.h"
 #include <stdlib.h>
+#include <filesystem>
 
 static bool g_bIntialized = false;
 static bool g_bTimeZoneUTC = false;
 static bool g_bTimeZoneSet = false;
 static cctz::time_zone g_hTimeZone, g_hTimeZoneLocal, g_hTimeZoneUTC;
+namespace filesystem = std::filesystem;
 
 
 static void CheckForUTC()
@@ -24,19 +26,108 @@ static void CheckForUTC()
 	g_bTimeZoneUTC = !strcasecmp ( g_hTimeZone.name().c_str(), "UTC" );
 }
 
+#if !_WIN32
+static bool DeterminePathToTimeZone ( filesystem::path & tPathToTimeZone, std::string & sTimeZoneName, CSphString & sWarning )
+{
+	const char * szTZ = getenv("TZ");
+	if ( szTZ )
+	{
+		sWarning.SetSprintf ( "Unable to determine local time zone from TZ '%s'", szTZ );
 
-static void SetTimeZoneLocal()
+		if ( *szTZ==':' )
+			++szTZ;
+
+		tPathToTimeZone = szTZ;
+		sTimeZoneName = szTZ;
+
+		return true;
+	}
+
+	tPathToTimeZone = "/etc/localtime";
+	if ( !filesystem::exists(tPathToTimeZone) )
+	{
+		sWarning.SetSprintf ( "Unable to determine local time zone from file '%s'", tPathToTimeZone.string().c_str() );
+		return false;
+	}
+
+	if ( std::filesystem::is_symlink(tPathToTimeZone) )
+	{
+		tPathToTimeZone = filesystem::read_symlink(tPathToTimeZone);
+		if ( tPathToTimeZone.is_relative() )
+			tPathToTimeZone = ( filesystem::path("/etc") / tPathToTimeZone ).lexically_normal();
+	}
+
+	return true;
+}
+
+
+static bool CheckRelativePath ( const filesystem::path & tPath, const std::string & sTimeZoneName, CSphString & sRes )
+{
+	if ( !tPath.empty() && *tPath.begin() != ".." && *tPath.begin() != "." )
+	{
+		sRes = sTimeZoneName.empty() ? tPath.string().c_str() : sTimeZoneName.c_str();
+		return true;
+	}
+
+	return false;
+}
+
+
+static CSphString GetLocalTimeZoneName ( CSphString & sWarning )
+{
+	const char * szTZDIR = getenv("TZDIR");
+	filesystem::path tTimeZoneDir = "/usr/share/zoneinfo/";
+	if ( szTZDIR )
+		tTimeZoneDir = szTZDIR;
+
+	filesystem::path tPathToTimeZone;
+	std::string sTimeZoneName;
+	CSphString sWarningText;
+	if ( !DeterminePathToTimeZone ( tPathToTimeZone, sTimeZoneName, sWarningText ) )
+	{
+		sWarning = sWarningText;
+		return "UTC";
+	}
+
+	CSphString sRes;
+	tTimeZoneDir = filesystem::weakly_canonical(tTimeZoneDir);
+	if ( CheckRelativePath ( tPathToTimeZone.lexically_relative(tTimeZoneDir), sTimeZoneName, sRes ) )
+		return sRes;
+
+	if ( !tPathToTimeZone.is_absolute() )
+		tPathToTimeZone = tTimeZoneDir / tPathToTimeZone;
+
+	tPathToTimeZone = filesystem::weakly_canonical(tPathToTimeZone);
+	if ( CheckRelativePath ( tPathToTimeZone.lexically_relative(tTimeZoneDir), sTimeZoneName, sRes ) )
+		return sRes;
+
+	sWarning = sWarningText;
+	return "UTC";
+}
+#endif
+
+static void SetTimeZoneLocal ( CSphString & sWarning )
 {
 	CSphString sDirName;
 	sDirName.SetSprintf ( "%s/tzdata", GET_FULL_SHARE_DIR() );
 
 #if _WIN32
 	_putenv_s ( "TZDIR", sDirName.cstr() );
+
+	// use cctz's internal local time zone code
+	g_hTimeZoneLocal = cctz::local_time_zone();
 #else
+	CSphString sZone = GetLocalTimeZoneName(sWarning);
+
 	setenv ( "TZDIR", sDirName.cstr(), 1 );
+
+	if ( !cctz::load_time_zone ( sZone.cstr(), &g_hTimeZoneLocal ) )
+	{
+		sWarning.SetSprintf ( "Unable to set local time zone '%s' (tried TZ dir: '%s'), using UTC", sZone.cstr(), sDirName.cstr() );
+		g_hTimeZoneLocal = g_hTimeZoneUTC;
+	}
 #endif
 
-	g_hTimeZoneLocal = cctz::local_time_zone();
 	g_hTimeZone = g_hTimeZoneLocal;
 	CheckForUTC();
 }
@@ -44,8 +135,8 @@ static void SetTimeZoneLocal()
 
 void InitTimeZones ( CSphString & sWarning )
 {
-	SetTimeZoneLocal();
 	cctz::load_time_zone ( "UTC", &g_hTimeZoneUTC );
+	SetTimeZoneLocal ( sWarning );
 	g_bIntialized = true;
 }
 
