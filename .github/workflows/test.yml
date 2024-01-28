@@ -499,7 +499,7 @@ jobs:
     with:
       arch: aarch64
       cmake_command: mkdir build && cd build && ctest -VV -S ../misc/ctest/justbuild.cmake -DCTEST_SOURCE_DIRECTORY=.. --no-compress-output
-      cache_key: build_bionic_aarch64
+      cache_key: build_jammy_aarch64
 
   build_freebsd:
     name: FreeBSD x86_64 build
