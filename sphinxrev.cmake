@@ -23,6 +23,7 @@ function ( guess_from_git )
 	set ( SPH_GIT_COMMIT_ID "${SPH_GIT_COMMIT_ID}" PARENT_SCOPE )
 
   # without this in some environments you can get error "detected dubious ownership in repository"
+	# `git config --global --add safe.directory '*'` in the docker image it runs in may not help. TODO: check why
   execute_process ( COMMAND "${GIT_EXECUTABLE}" config --global --add safe.directory "${MANTICORE_SOURCE_DIR}")
 
 	# extract timestamp and make number YYMMDDHH from it
