@@ -13,6 +13,9 @@ function ( guess_from_git )
 		return ()
 	endif ()
 
+	# without this in some environments you can get error "detected dubious ownership in repository"
+  execute_process ( COMMAND "${GIT_EXECUTABLE}" config --add safe.directory "${MANTICORE_SOURCE_DIR}")
+
 	# extract short has as CHECK_GIT_COMMIT_ID
 	execute_process ( COMMAND "${GIT_EXECUTABLE}" log -1 --format=%h
 			WORKING_DIRECTORY "${MANTICORE_SOURCE_DIR}"
