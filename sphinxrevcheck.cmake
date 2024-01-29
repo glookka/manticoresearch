@@ -65,5 +65,5 @@ endif ()
 message ( STATUS "CHECK_GIT_COMMIT_ID=${CHECK_GIT_COMMIT_ID}" )
 
 if (NOT CHECK_GIT_COMMIT_ID STREQUAL "${CONFIGURED_GIT_COMMIT_ID}")
-	message ( FATAL_ERROR "Current commit ${CHECK_GIT_COMMIT_ID} is differs from stored ${CONFIGURED_GIT_COMMIT_ID}. Run 'cmake .' in build dir to fix" )
+	message ( FATAL_ERROR "Current commit ${CHECK_GIT_COMMIT_ID} differs from the stored ${CONFIGURED_GIT_COMMIT_ID}. Run 'cmake .' in build dir to fix" )
 endif ()

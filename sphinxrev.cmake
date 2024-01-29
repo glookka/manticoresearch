@@ -13,6 +13,10 @@ function ( guess_from_git )
 		return ()
 	endif ()
 
+	# without this in some environments you can get error "detected dubious ownership in repository"
+	# `git config --global --add safe.directory '*'` in the docker image it runs in may not help. TODO: check why
+  execute_process ( COMMAND "${GIT_EXECUTABLE}" config --global --add safe.directory "${MANTICORE_SOURCE_DIR}")
+
 	# extract short has as SPH_GIT_COMMIT_ID
 	execute_process ( COMMAND "${GIT_EXECUTABLE}" log -1 --format=%h
 			WORKING_DIRECTORY "${MANTICORE_SOURCE_DIR}"
@@ -21,10 +25,6 @@ function ( guess_from_git )
 			ERROR_QUIET
 			OUTPUT_STRIP_TRAILING_WHITESPACE )
 	set ( SPH_GIT_COMMIT_ID "${SPH_GIT_COMMIT_ID}" PARENT_SCOPE )
-
-  # without this in some environments you can get error "detected dubious ownership in repository"
-	# `git config --global --add safe.directory '*'` in the docker image it runs in may not help. TODO: check why
-  execute_process ( COMMAND "${GIT_EXECUTABLE}" config --global --add safe.directory "${MANTICORE_SOURCE_DIR}")
 
 	# extract timestamp and make number YYMMDDHH from it
 	execute_process ( COMMAND "${GIT_EXECUTABLE}" log -1 --date=format:"%y%m%d%H" --format=%cd
