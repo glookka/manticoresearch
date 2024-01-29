@@ -15585,7 +15585,7 @@ void HandleMysqlShowVariables ( RowBuffer_i & dRows, const SqlStmt_t & tStmt )
 		dTable.MatchTuplet ( "character_set_client", "utf8" );
 		dTable.MatchTuplet ( "character_set_connection", "utf8" );
 		dTable.MatchTuplet ( "grouping_in_utc", GetGroupingInUTC() ? "1" : "0" );
-		dTable.MatchTuplet ( "timezone", GetTimeZone().cstr() );
+		dTable.MatchTuplet ( "timezone", GetTimeZoneName().cstr() );
 		dTable.MatchTupletFn ( "last_insert_id" , [&pVars]
 		{
 			StringBuilder_c tBuf ( "," );
@@ -19911,6 +19911,8 @@ void ConfigureSearchd ( const CSphConfig & hConf, bool bOptPIDFile, bool bTestMo
 		SetTimeZone ( hSearchd["timezone"].cstr(), sWarn );
 		if ( !sWarn.IsEmpty() )
 			sphWarning ( "%s", sWarn.cstr() );
+		else
+			sphInfo ( "Using time zone '%s'", GetTimeZoneName().cstr() );
 	}
 
 	// sha1 password hash for shutdown action
@@ -20745,10 +20747,13 @@ int WINAPI ServiceMain ( int argc, char **argv ) EXCLUDES (MainThread)
 		sError = "";
 
 	{
-		CSphString sTZWarning;
-		InitTimeZones ( sTZWarning );
+		StrVec_t dWarnings;
+		InitTimeZones ( dWarnings );
+		CSphString sTZWarning = ConcatWarnings(dWarnings);
 		if ( !sTZWarning.IsEmpty() )
 			sphWarning ( "Error initializing time zones: %s", sTZWarning.cstr() );
+
+		sphInfo ( "Using local time zone '%s'", GetLocalTimeZoneName().cstr() );
 	}
 
 	//////////////////////

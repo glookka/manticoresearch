@@ -26,10 +26,11 @@ enum class TimeUnit_e
 	YEAR
 };
 
-void		InitTimeZones ( CSphString & sWarning );
+void		InitTimeZones ( StrVec_t & dWarnings );
 bool		SetTimeZone ( const char * szTZ, CSphString & sError );
 bool		IsTimeZoneSet();
-CSphString	GetTimeZone();
+CSphString	GetTimeZoneName();
+CSphString	GetLocalTimeZoneName();
 
 cctz::civil_second ConvertTime ( time_t tTime );		// use local time zone by default; can be overridden by `timezone` setting
 cctz::civil_second ConvertTimeLocal ( time_t tTime );	// always use local time zone
