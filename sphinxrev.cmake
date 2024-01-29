@@ -23,7 +23,7 @@ function ( guess_from_git )
 	set ( SPH_GIT_COMMIT_ID "${SPH_GIT_COMMIT_ID}" PARENT_SCOPE )
 
   # without this in some environments you can get error "detected dubious ownership in repository"
-  execute_process ( COMMAND "${GIT_EXECUTABLE}" config --add safe.directory "${MANTICORE_SOURCE_DIR}")
+  execute_process ( COMMAND "${GIT_EXECUTABLE}" config --global --add safe.directory "${MANTICORE_SOURCE_DIR}")
 
 	# extract timestamp and make number YYMMDDHH from it
 	execute_process ( COMMAND "${GIT_EXECUTABLE}" log -1 --date=format:"%y%m%d%H" --format=%cd
