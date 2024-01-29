@@ -53,12 +53,16 @@ guess_from_git ()
 
 # 2-nd try - if we build from git archive. Correct hash and date provided then, but no branch
 if (NOT CHECK_GIT_COMMIT_ID)
+  message ( STATUS "guess_from_git failed. 2nd try - extract_from_git_slug" )
 	extract_from_git_slug ( "${MANTICORE_SOURCE_DIR}/src/sphinxversion.h.in" )
 endif ()
 
 if (NOT CHECK_GIT_COMMIT_ID)
+	message ( STATUS "extract_from_git_slug failed. 3rd try - forcing setting CHECK_GIT_COMMIT_ID" )
 	set ( CHECK_GIT_COMMIT_ID "DEADBEEF" )
 endif ()
+
+message ( STATUS "CHECK_GIT_COMMIT_ID=${CHECK_GIT_COMMIT_ID}" )
 
 if (NOT CHECK_GIT_COMMIT_ID STREQUAL "${CONFIGURED_GIT_COMMIT_ID}")
 	message ( FATAL_ERROR "Current commit ${CHECK_GIT_COMMIT_ID} is differs from stored ${CONFIGURED_GIT_COMMIT_ID}. Run 'cmake .' in build dir to fix" )
