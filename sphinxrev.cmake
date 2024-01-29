@@ -24,6 +24,7 @@ function ( guess_from_git )
 
 	# extract timestamp and make number YYMMDDHH from it
 cmake_print_variables(MANTICORE_SOURCE_DIR)
+execute_process ( COMMAND "${GIT_EXECUTABLE}" config --global --add safe.directory "${MANTICORE_SOURCE_DIR}")
 	execute_process ( COMMAND "${GIT_EXECUTABLE}" log -1 --date=format:"%y%m%d%H" --format=%cd
 			WORKING_DIRECTORY "${MANTICORE_SOURCE_DIR}"
 			RESULT_VARIABLE res

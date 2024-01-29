@@ -89,6 +89,7 @@ rm *.tar.xz
 RUN rm -rf /var/lib/apt/lists/*
 
 ADD sphinx /root/.sphinx
+RUN git config --global --add safe.directory '*'
 ADD entry_point.sh /
 VOLUME [ "/work" ]
 WORKDIR /work
