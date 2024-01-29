@@ -25,6 +25,7 @@ function ( guess_from_git )
 			ERROR_QUIET
 			OUTPUT_STRIP_TRAILING_WHITESPACE )
 	set ( CHECK_GIT_COMMIT_ID "${CHECK_GIT_COMMIT_ID}" PARENT_SCOPE )
+cmake_print_variables ( CHECK_GIT_COMMIT_ID )
 
 endfunction ()
 
