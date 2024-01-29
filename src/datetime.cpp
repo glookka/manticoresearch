@@ -88,6 +88,15 @@ static CSphString DetermineLocalTimeZoneName ( CSphString & sWarning )
 	sWarning = sPrefix;
 	return "UTC";
 }
+
+
+CSphString FixupZoneName ( const CSphString & sName )
+{
+	if ( sName=="Etc/UTC" )
+		return "UTC";
+
+	return sName;
+}
 #endif
 
 static void SetTimeZoneLocal ( StrVec_t & dWarnings )
@@ -106,11 +115,13 @@ static void SetTimeZoneLocal ( StrVec_t & dWarnings )
 	if ( !sWarning.IsEmpty() )
 		dWarnings.Add(sWarning);
 
+	sZone = FixupZoneName(sZone);
+
 	setenv ( "TZDIR", sDirName.cstr(), 1 );
 
 	if ( !cctz::load_time_zone ( sZone.cstr(), &g_hTimeZoneLocal ) )
 	{
-		sWarning.SetSprintf ( "Unable to load local time zone '%s'", sZone.cstr() );
+		sWarning.SetSprintf ( "Unable to load local time zone '%s' from '%s' dir", sZone.cstr(), sDirName.cstr() );
 		dWarnings.Add(sWarning);
 		g_hTimeZoneLocal = g_hTimeZoneUTC;
 	}
