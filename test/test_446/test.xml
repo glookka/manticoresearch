@@ -121,8 +121,8 @@ CREATE TABLE test_table
 );
 </db_create>
 
-<db_insert>
-	<repeat count="24" vars="stamp" init="22500115200">
+<db_insert>								  
+	<repeat count="24" vars="stamp" init="5594967295">
 		<var name="vals"/>
 		<repeat count="89" vars="stamp" inc="3600"><var name="vals" delimiter=",">(0,<stamp/>,'aaaa')</var></repeat>
 		INSERT INTO test_table_bigint VALUES <vals/><db_insert/></repeat>
