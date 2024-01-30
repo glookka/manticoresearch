@@ -20674,6 +20674,19 @@ static void CacheCPUInfo()
 }
 
 
+static void LogTimeZoneStartup ( const CSphString & sWarning )
+{
+	// avoid writing this to stdout
+	bool bLogStdout = g_bLogStdout;
+	g_bLogStdout = false;
+	if ( !sWarning.IsEmpty() )
+		sphWarning ( "Error initializing time zones: %s", sWarning.cstr() );
+
+	sphInfo ( "Using local time zone '%s'", GetLocalTimeZoneName().cstr() );
+	g_bLogStdout = bLogStdout;
+}
+
+
 int WINAPI ServiceMain ( int argc, char **argv ) EXCLUDES (MainThread)
 {
 	ScopedRole_c thMain (MainThread);
@@ -20746,14 +20759,11 @@ int WINAPI ServiceMain ( int argc, char **argv ) EXCLUDES (MainThread)
 	if ( !sError.IsEmpty() )
 		sError = "";
 
+	CSphString sTZWarning;
 	{
 		StrVec_t dWarnings;
 		InitTimeZones ( dWarnings );
-		CSphString sTZWarning = ConcatWarnings(dWarnings);
-		if ( !sTZWarning.IsEmpty() )
-			sphWarning ( "Error initializing time zones: %s", sTZWarning.cstr() );
-
-		sphInfo ( "Using local time zone '%s'", GetLocalTimeZoneName().cstr() );
+		sTZWarning = ConcatWarnings(dWarnings);
 	}
 
 	//////////////////////
@@ -20892,6 +20902,8 @@ int WINAPI ServiceMain ( int argc, char **argv ) EXCLUDES (MainThread)
 
 		CheckPort ( iOptPort );
 	}
+
+	LogTimeZoneStartup(sTZWarning);
 
 	/////////////////////
 	// parse config file

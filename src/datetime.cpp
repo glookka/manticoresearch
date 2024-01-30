@@ -90,7 +90,7 @@ static CSphString DetermineLocalTimeZoneName ( CSphString & sWarning )
 }
 
 
-CSphString FixupZoneName ( const CSphString & sName )
+static CSphString FixupZoneName ( const CSphString & sName )
 {
 	if ( sName=="Etc/UTC" )
 		return "UTC";
