@@ -43,6 +43,10 @@ on:
         required: false
         type: string
         default: "build/xml build/CMakeFiles/CMake*.log build/api/libsphinxclient/testcli build/src/indexer build/src/indextool build/src/searchd build/src/tests build/src/gtests/gmanticoretest build/config/*.c build/config/*.h build/**/*.gcno"
+      artifact_name:
+        required: false
+        type: string
+        default: build_${{ inputs.DISTR }}_${{ inputs.CTEST_CONFIGURATION_TYPE }}_${{ inputs.arch }}
       HOMEBREW_PREFIX:
         required: false
         type: string
@@ -103,5 +107,5 @@ jobs:
         if: success()
         uses: manticoresoftware/upload_artifact_with_retries@v3
         with:
-          name: build_${{ inputs.DISTR }}_${{ inputs.CTEST_CONFIGURATION_TYPE }}_${{ inputs.arch }}
+          name: ${{ inputs.artifact_name }}
           path: ${{ inputs.artifact_list }}
