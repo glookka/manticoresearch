@@ -46,7 +46,6 @@ on:
       artifact_name:
         required: false
         type: string
-        default: build_${{ inputs.DISTR }}_${{ inputs.CTEST_CONFIGURATION_TYPE }}_${{ inputs.arch }}
       HOMEBREW_PREFIX:
         required: false
         type: string
@@ -103,9 +102,15 @@ jobs:
       - name: 🚀 Build
         run: ${{ inputs.cmake_command }}
 
+      - name: Set output artifact name
+        id: artifact_name
+        run: |
+          USER_INPUT=${{ github.event.inputs.artifact_name }}
+          echo "value=${USER_INPUT:-"build_${{ github.event.inputs.DISTR }}_${{ github.event.inputs.CTEST_CONFIGURATION_TYPE }}_${{ github.event.inputs.arch }}"}" >> "$GITHUB_OUTPUT"
+
       - name: Upload build artifacts
         if: success()
         uses: manticoresoftware/upload_artifact_with_retries@v3
         with:
-          name: ${{ inputs.artifact_name }}
+          name: ${{ steps.artifact_name.outputs.value }}
           path: ${{ inputs.artifact_list }}
