@@ -20903,8 +20903,6 @@ int WINAPI ServiceMain ( int argc, char **argv ) EXCLUDES (MainThread)
 		CheckPort ( iOptPort );
 	}
 
-	LogTimeZoneStartup(sTZWarning);
-
 	/////////////////////
 	// parse config file
 	/////////////////////
@@ -21081,6 +21079,8 @@ int WINAPI ServiceMain ( int argc, char **argv ) EXCLUDES (MainThread)
 		}
 	}
 #endif
+
+	LogTimeZoneStartup(sTZWarning);
 
 	// init before workpool, as last checks binlog
 	ModifyDaemonPaths ( hSearchd, FixPathAbsolute );
